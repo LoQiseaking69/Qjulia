@@ -6,7 +6,7 @@ description = "Quantum Fractal Generator"
 authors = ["Ant OG <Reel0112358.13@proton.me>"]
 license = "MIT"
 repository = "https://github.com/LoQiseaking69/QJulia"
-documentation = "https://your.documentation.url"
+documentation = "https://github.com/LoQiseaking69/Qjulia/blob/main/README.md"
 
 # Dependencies
 [dependencies]
