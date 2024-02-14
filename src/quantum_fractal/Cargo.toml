@@ -1,7 +1,7 @@
 [package]
 name = "QJulia"
 version = "0.1.0"
-edition = "2021"  # Updated to the latest stable Rust edition
+edition = "2021"
 description = "Quantum Fractal Generator"
 authors = ["Ant OG <Reel0112358.13@proton.me>"]
 license = "MIT"
@@ -13,7 +13,8 @@ documentation = "https://your.documentation.url"
 pyo3 = { version = "0.15", features = ["extension-module"] }
 num_complex = "0.4"
 rayon = "1.5"
-# Consider additional dependencies like 'serde' for serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 # Python extension module configuration
 [lib]
