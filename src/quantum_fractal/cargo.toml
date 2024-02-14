@@ -1,0 +1,39 @@
+[package]
+name = "quantum_fractal"
+version = "0.1.0"
+edition = "2018"
+description = "Quantum Fractal Generator"
+authors = ["Your Name <your@email.com>"]
+license = "MIT" # or your preferred license
+
+# Dependencies
+[dependencies]
+pyo3 = { version = "0.13", features = ["extension-module"] }
+num_complex = "0.4"
+rayon = "1.5"
+# Add additional dependencies here
+
+# Python extension module configuration
+[lib]
+name = "quantum_fractal"
+crate-type = ["cdylib"]
+
+# Features for advanced quantum effect computations and shared object generation
+[features]
+default = []
+# Define any special features your project might need here.
+
+# Optional: Configuration for tests and benchmarks
+[dev-dependencies]
+# Testing and benchmarking dependencies
+
+[[bench]]
+name = "my_benchmark"
+harness = false # if you want to use a custom test framework
+
+[[test]]
+name = "my_test"
+
+# Optional: Include build scripts if necessary
+[build-dependencies]
+# Build script dependencies
