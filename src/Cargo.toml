@@ -18,7 +18,7 @@ serde_json = "1.0"
 
 # Python extension module configuration
 [lib]
-name = "quantum_fractal"
+name = "src"
 crate-type = ["cdylib"]
 
 # Features for advanced quantum effect computations and shared object generation
