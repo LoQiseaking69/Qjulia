@@ -34,7 +34,7 @@ pip install -r requirements.txt
 Run the application by executing the following command in your terminal:
 
 ```bash
-python quantum_fractal_generator.py
+python QJulia.py
 ```
 
 Once the application window opens, you can interact with the GUI to generate fractal images with different quantum effects and parameters.
