@@ -1,10 +1,10 @@
 [package]
 name = "quantum_fractal"
 version = "0.1.0"
-edition = "2018"
+edition = "2024"
 description = "Quantum Fractal Generator"
-authors = ["Your Name <your@email.com>"]
-license = "MIT" # or your preferred license
+authors = ["Ant OG <Reel0112358.13@proton.me>"]
+license = "MIT" 
 
 # Dependencies
 [dependencies]
