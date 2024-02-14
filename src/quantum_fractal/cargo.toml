@@ -1,5 +1,5 @@
 [package]
-name = "quantum_fractal"
+name = "QJulia"
 version = "0.1.0"
 edition = "2024"
 description = "Quantum Fractal Generator"
