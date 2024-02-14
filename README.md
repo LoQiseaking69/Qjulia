@@ -41,7 +41,7 @@ Once the application window opens, you can interact with the GUI to generate fra
 
 ## Screenshots
 **test Output from the project notebook**
-![Quantum Fractal Generator](https://github.com/LoQiseaking69/Qjulia/blob/main/Qjulia.png)
+![Quantum Fractal Generator](https://github.com/LoQiseaking69/Qjulia/blob/main/ASSETS/setx.png)
 *Hbar (Quantum Factor): 1.0
 Average number of iterations: 2.26
 Maximum number of iterations: 20
