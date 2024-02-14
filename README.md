@@ -41,7 +41,7 @@ Once the application window opens, you can interact with the GUI to generate fra
 
 ## Screenshots
 
-![Quantum Fractal Generator](/screenshots/fractal_generator.png)
+![Quantum Fractal Generator](https://github.com/LoQiseaking69/Qjulia/blob/main/Qjulia.png)
 
 ## Contributing
 
