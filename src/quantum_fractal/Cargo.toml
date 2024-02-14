@@ -1,0 +1,26 @@
+[package]
+name = "QJulia"
+version = "0.1.0"
+edition = "2024"
+description = "Quantum Fractal Generator"
+authors = ["Ant OG <Reel0112358.13@proton.me>"]
+license = "MIT"
+repository = "https://github.com/YourUsername/QJulia"
+documentation = "https://your.documentation.url"
+
+# Dependencies
+[dependencies]
+pyo3 = { version = "0.15", features = ["extension-module"] }
+num_complex = "0.4"
+rayon = "1.5"
+# Consider additional dependencies like 'serde' for serialization
+
+# Python extension module configuration
+[lib]
+name = "quantum_fractal"
+crate-type = ["cdylib"]
+
+# Features for advanced quantum effect computations and shared object generation
+[features]
+default = ["quantum-enhancements"]
+quantum-enhancements = []
