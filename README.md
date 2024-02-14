@@ -3,7 +3,7 @@
 
 The Quantum Fractal Generator is an advanced application that leverages both Python and Rust to generate fractal images using quantum-inspired algorithms. It combines the intuitive graphical user interface (GUI) provided by Python with the high-performance computation capabilities of Rust.
 
-[qfrac]()
+![qfrac](https://github.com/LoQiseaking69/Qjulia/blob/main/ASSETS/IMG_7142.gif)
 ## Features
 
 - **Quantum Effects**: Apply various quantum-inspired effects to generate fractals, such as Phase Kickback and Quantum Tunneling, along with traditional effects like Pauli X Gate, Pauli Y Gate, Hadamard Gate, and Phase Shift Gate.
