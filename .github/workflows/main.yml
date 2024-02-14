@@ -32,7 +32,7 @@ jobs:
 
     - name: Build Rust Library
       run: |
-        cd src\quantum_fractal
+        cd src\quantum_fractal\lib.rs
         cargo build --release
 
     - name: Set up Python
