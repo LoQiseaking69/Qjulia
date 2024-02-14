@@ -19,7 +19,7 @@ import ctypes
 from numpy.ctypeslib import ndpointer
 
 # Load the Rust library
-rust_lib = ctypes.CDLL("path/to/rust/library.so")
+rust_lib = ctypes.CDLL("path/to/rust/library.dll")
 
 # Define function signatures
 rust_lib.generate_quantum_fractal.argtypes = [
