@@ -40,8 +40,19 @@ python quantum_fractal_generator.py
 Once the application window opens, you can interact with the GUI to generate fractal images with different quantum effects and parameters.
 
 ## Screenshots
-
+**test Output from the project notebook**
 ![Quantum Fractal Generator](https://github.com/LoQiseaking69/Qjulia/blob/main/Qjulia.png)
+*Hbar (Quantum Factor): 1.0
+Average number of iterations: 2.26
+Maximum number of iterations: 20
+Standard deviation of iterations: 1.88
+Area with high iterations (>80% of max): 0.00
+Area with low iterations (<20% of max): 0.80
+Quantum Effect Measure: 0.02
+Complexity Ratio (High/Low Iterations): 0.00*
+
+**the test UI from the project notebook**
+![QUI](https://github.com/LoQiseaking69/Qjulia/blob/main/ASSETS/ScreenShot_2_10_2024_8_18_41_PM.png)
 
 ## Contributing
 
