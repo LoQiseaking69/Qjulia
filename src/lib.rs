@@ -51,13 +51,18 @@ fn generate_quantum_fractal(
     let mut fractal = vec![vec![0; width]; height];
     let counter = Arc::new(AtomicUsize::new(0));
 
+    // Wrap the quantum_effect_name in an Arc to share among threads safely
+    let quantum_effect_name_arc = Arc::new(quantum_effect_name);
+
     fractal.par_iter_mut().enumerate().for_each(|(y, row)| {
         let counter_clone = Arc::clone(&counter);
+        let quantum_effect_name = Arc::clone(&quantum_effect_name_arc);
         row.iter_mut().enumerate().for_each(move |(x, pixel)| {
             let zx = x_min + (x_max - x_min) * (x as f64 / width as f64);
             let zy = y_min + (y_max - y_min) * (y as f64 / height as f64);
             let z = Complex::new(zx, zy);
 
+            // Dereference the Arc to get the actual String
             *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &quantum_effect_name);
             counter_clone.fetch_add(1, Ordering::Relaxed);
         });
