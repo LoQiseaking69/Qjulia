@@ -49,12 +49,13 @@ class FractalWindow(QMainWindow):
 
         # Left Panel - Parameters and Controls
         left_panel = QVBoxLayout()
-        main_layout.addLayout(left_panel)  # Corrected here
+        main_layout.addLayout(left_panel)
 
         # Quantum Effect Selection
         self.effectCombo = QComboBox()
         self.effectCombo.addItems(["phase_kickback", "quantum_tunneling", "superposition", "pauli_x", "pauli_y", "hadamard", "phase_shift"])
-        left_panel.addWidget(self.create_labeled_control("Select Quantum Effect:", self.effectCombo))
+        quantum_effect_widget = self.create_labeled_control("Select Quantum Effect:", self.effectCombo)
+        left_panel.addWidget(quantum_effect_widget)
 
         # Parameter Sliders
         self.x_min_slider = self.create_slider(-100, 100, -20, "X Min:")
@@ -86,7 +87,7 @@ class FractalWindow(QMainWindow):
 
         # Right Panel - Fractal Display and Toolbar
         right_panel = QVBoxLayout()
-        main_layout.addLayout(right_panel)  # Corrected here
+        main_layout.addLayout(right_panel)
 
         # Fractal Display
         self.figure = plt.figure()
@@ -110,7 +111,9 @@ class FractalWindow(QMainWindow):
         label = QLabel(label_text)
         layout.addWidget(label)
         layout.addWidget(control)
-        return layout
+        container_widget = QWidget()
+        container_widget.setLayout(layout)
+        return container_widget
 
     def create_slider(self, min_val, max_val, init_val, label_text):
         layout = QVBoxLayout()
@@ -136,7 +139,7 @@ class FractalWindow(QMainWindow):
     @pyqtSlot(np.ndarray, float)
     def displayFractal(self, fractal, generation_time):
         self.figure.clear()
-        plt.imshow(fractal, cmap="viridis")  # Using a fixed colormap for simplicity
+        plt.imshow(fractal, cmap="viridis")
         plt.colorbar()
         self.canvas.draw()
         self.infoPanel.append(f"Fractal generated in {generation_time:.2f} seconds.")
@@ -149,7 +152,6 @@ class FractalWindow(QMainWindow):
         self.update_status_signal.emit("Generating fractal...")
         QApplication.processEvents()
 
-        # Retrieve values from sliders and combobox
         x_min = self.x_min_slider.value() / 10.0
         x_max = self.x_max_slider.value() / 10.0
         y_min = self.y_min_slider.value() / 10.0
@@ -160,7 +162,6 @@ class FractalWindow(QMainWindow):
         hbar = self.hbar_slider.value() / 10.0
         quantum_effect_name = self.effectCombo.currentText()
 
-        # Define function signatures for the Rust library
         rust_lib.generate_quantum_fractal.argtypes = [
             ctypes.c_size_t, ctypes.c_size_t, ctypes.c_double, ctypes.c_double,
             ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
@@ -171,7 +172,6 @@ class FractalWindow(QMainWindow):
         start_time = time.time()
 
         try:
-            # Call the Rust function
             fractal = rust_lib.generate_quantum_fractal(
                 self.width, self.height, x_min, x_max, y_min, y_max,
                 c_real, c_imag, max_iter, hbar, quantum_effect_name.encode('utf-8')
