@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use num-complex::Complex;
+use num_complex::Complex;
 use rayon::prelude::*;
 
 // Function to apply Pauli-X Gate
