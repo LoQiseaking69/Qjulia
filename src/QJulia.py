@@ -49,7 +49,7 @@ class FractalWindow(QMainWindow):
 
         # Left Panel - Parameters and Controls
         left_panel = QVBoxLayout()
-        main_layout.addLayout(left_panel, 1)
+        main_layout.addLayout(left_panel)
 
         # Quantum Effect Selection
         self.effectCombo = QComboBox()
@@ -86,7 +86,7 @@ class FractalWindow(QMainWindow):
 
         # Right Panel - Fractal Display and Toolbar
         right_panel = QVBoxLayout()
-        main_layout.addLayout(right_panel, 3)
+        main_layout.addLayout(right_panel)
 
         # Fractal Display
         self.figure = plt.figure()
