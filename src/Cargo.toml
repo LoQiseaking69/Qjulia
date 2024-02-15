@@ -19,6 +19,7 @@ serde_json = "1.0"
 # Python extension module configuration
 [lib]
 crate-type = ["cdylib"]
+path = "lib.rs" # Explicitly specifying the path to the main library file
 
 # Features for advanced quantum effect computations and shared object generation
 [features]
