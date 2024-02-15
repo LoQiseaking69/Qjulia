@@ -8,20 +8,20 @@ import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QSlider, QComboBox, QPushButton, QStatusBar, QMessageBox, QTextEdit,
-    QProgressBar, QGridLayout
+    QProgressBar
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar
 )
-from numba import jit
 import time
 
 # Function to determine the path to the compiled Rust library
 def get_library_path():
     library_name = "QJulia"
-    library_file = f"{library_name}.dll"  # Assuming Windows .dll file
+    library_extension = {"win32": ".dll", "linux": ".so", "darwin": ".dylib"}[sys.platform]
+    library_file = f"{library_name}{library_extension}"
     project_root = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(project_root, "target", "release", library_file)
 
@@ -30,6 +30,9 @@ rust_lib_path = get_library_path()
 rust_lib = ctypes.CDLL(rust_lib_path)
 
 class FractalWindow(QMainWindow):
+    update_status_signal = pyqtSignal(str)
+    fractal_generated_signal = pyqtSignal(np.ndarray, float)
+
     def __init__(self):
         super().__init__()
         self.width, self.height = 800, 600  # Default fractal image dimensions
@@ -71,6 +74,10 @@ class FractalWindow(QMainWindow):
         self.generateButton.clicked.connect(self.startFractalGeneration)
         left_panel.addWidget(self.generateButton)
 
+        # Progress Bar
+        self.progressBar = QProgressBar()
+        left_panel.addWidget(self.progressBar)
+
         # Info Panel
         self.infoPanel = QTextEdit()
         self.infoPanel.setReadOnly(True)
@@ -93,6 +100,10 @@ class FractalWindow(QMainWindow):
         # Status Bar
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
+
+        # Connect signals
+        self.update_status_signal.connect(self.updateStatusBar)
+        self.fractal_generated_signal.connect(self.displayFractal)
 
     def create_labeled_control(self, label_text, control):
         layout = QHBoxLayout()
@@ -118,11 +129,24 @@ class FractalWindow(QMainWindow):
     def update_slider_value(self, label, value, min_val, max_val):
         label.setText(f"{value / 10.0:.1f}")
 
+    @pyqtSlot(str)
+    def updateStatusBar(self, message):
+        self.statusBar.showMessage(message)
+
+    @pyqtSlot(np.ndarray, float)
+    def displayFractal(self, fractal, generation_time):
+        self.figure.clear()
+        plt.imshow(fractal, cmap="viridis")  # Using a fixed colormap for simplicity
+        plt.colorbar()
+        self.canvas.draw()
+        self.infoPanel.append(f"Fractal generated in {generation_time:.2f} seconds.")
+        self.progressBar.setValue(100)
+
     def startFractalGeneration(self):
         threading.Thread(target=self.generateFractal, daemon=True).start()
 
     def generateFractal(self):
-        self.progressBar.setValue(0)
+        self.update_status_signal.emit("Generating fractal...")
         QApplication.processEvents()
 
         # Retrieve values from sliders and combobox
@@ -153,20 +177,12 @@ class FractalWindow(QMainWindow):
                 c_real, c_imag, max_iter, hbar, quantum_effect_name.encode('utf-8')
             )
 
-            # Plotting the fractal
-            self.figure.clear()
-            plt.imshow(fractal, cmap="viridis")  # Using a fixed colormap for simplicity
-            plt.colorbar()
-            self.canvas.draw()
-
             end_time = time.time()
-            self.infoPanel.append(f"Fractal generated in {end_time - start_time:.2f} seconds.")
-
-            self.progressBar.setValue(100)
+            self.fractal_generated_signal.emit(fractal, end_time - start_time)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
-            self.statusBar.showMessage("Failed to generate fractal")
+            self.update_status_signal.emit("Failed to generate fractal")
             self.progressBar.setValue(0)
 
 def main():
