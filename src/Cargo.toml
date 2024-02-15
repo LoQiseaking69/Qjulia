@@ -1,13 +1,14 @@
 [package]
 name = "QJulia"
-version = "0.2.0" # Update as per semantic versioning
+version = "0.2.0"
 edition = "2021"
-description = "Quantum Fractal Generator - A Rust library for generating fractals with quantum-inspired algorithms"
+description = "Quantum Fractal Generator - A Rust library for generating fractals with quantum-inspired algorithms."
 authors = ["Ant OG <Reel0112358.13@proton.me>"]
 license = "MIT"
 repository = "https://github.com/LoQiseaking69/QJulia"
 documentation = "https://github.com/LoQiseaking69/Qjulia/blob/main/README.md"
 
+# Dependencies
 [dependencies]
 pyo3 = { version = "0.15", features = ["extension-module"] }
 num-complex = "0.4"
@@ -18,14 +19,11 @@ log = "0.4"
 simple_logger = "1.0"
 thiserror = "1.0" # For enhanced error handling
 
-# Add dependencies for testing
-[dev-dependencies]
-pytest = "0.6"
-
 [lib]
 crate-type = ["cdylib"]
 path = "lib.rs"
 
+# Features for advanced quantum effect computations
 [features]
 default = ["quantum-enhancements"]
 quantum-enhancements = ["advanced-quantum-features"]
