@@ -12,7 +12,6 @@ The Quantum Fractal Generator is an advanced application that leverages both Pyt
 - **Real-time Visualization**: Witness the fractal image evolve in real-time as you tweak parameters.
 - **Enhanced Performance**: Leverages Rust's performance for efficient and fast fractal computation.
 - **Interoperability**: Seamlessly integrates Python and Rust, utilizing the strengths of both languages.
-- **Quantum Circuit Visualization**: Explore the quantum circuit corresponding to the selected quantum effect.
 
 ## Requirements
 
@@ -21,7 +20,6 @@ The Quantum Fractal Generator is an advanced application that leverages both Pyt
 - NumPy
 - Matplotlib
 - Numba
-- Qiskit (for quantum circuit visualization)
 - Rust (for running the high-performance backend)
 
 ## Installation
