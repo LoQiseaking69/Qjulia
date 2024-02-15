@@ -6,62 +6,88 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  CARGO_TERM_COLOR: always
+  PYTHON_VERSION: '3.10'
+
 jobs:
-  build-and-package:
+  build:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        default: true
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          default: true
+          override: true
 
-    - name: Cache Rust Build
-      uses: actions/cache@v3
-      with:
-        path: |
-          src/target
-          C:\Users\runneradmin\.cargo\registry
-          C:\Users\runneradmin\.cargo\git
-        key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache Rust Build
+        uses: actions/cache@v3
+        with:
+          path: |
+            Qjulia-main/src/target
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
 
-    - name: Build Rust Library
-      run: |
-        cd src
-        cargo build --release
+      - name: Build Rust Library
+        run: |
+          cd Qjulia-main/src
+          cargo build --release
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Cache Python Dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~\AppData\Local\pip\Cache
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+      - name: Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('Qjulia-main/src/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Qjulia-main/src/requirements.txt
 
-    - name: Package PyQt5 Application
-      run: |
-        pyinstaller --noconfirm --onefile --noconsole ^
-                    --add-binary "src/target/release/QJulia.dll;." ^
-                    src/QJulia.py
+  package:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Upload Compiled Rust Library and Packaged Application
-      uses: actions/upload-artifact@v3
-      with:
-        name: quantum-fractal-package
-        path: |
-          src/target/release/QJulia.dll
-          dist/QJulia.exe
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Qjulia-main/src/requirements.txt
+
+      - name: Package PyQt5 Application
+        run: |
+          cd Qjulia-main/src
+          pyinstaller --noconfirm --onefile --noconsole ^
+                      --add-binary "target/release/QJulia.dll;." ^
+                      QJulia.py
+
+      - name: Upload Packaged Application and Rust Library
+        uses: actions/upload-artifact@v3
+        with:
+          name: quantum-fractal-package-${{ github.sha }}
+          path: |
+            Qjulia-main/src/target/release/QJulia.dll
+            Qjulia-main/src/dist/QJulia.exe
