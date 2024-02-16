@@ -3,7 +3,7 @@ use num_complex::Complex;
 use rayon::prelude::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use log::{info, warn, error};
+use log::{info, warn};
 
 fn apply_gate(z: Complex<f64>, gate: &str, phase: f64) -> Complex<f64> {
     match gate {
@@ -18,9 +18,7 @@ fn apply_gate(z: Complex<f64>, gate: &str, phase: f64) -> Complex<f64> {
     }
 }
 
-fn complex_fractal_algorithm(
-    z: Complex<f64>, c: Complex<f64>, max_iter: u32, hbar: f64, quantum_effect: &str
-) -> u32 {
+fn complex_fractal_algorithm(z: Complex<f64>, c: Complex<f64>, max_iter: u32, hbar: f64, quantum_effect: &str) -> u32 {
     let mut z = z;
     let mut iter = 0;
 
@@ -51,7 +49,6 @@ fn generate_quantum_fractal(
     let mut fractal = vec![vec![0; width]; height];
     let counter = Arc::new(AtomicUsize::new(0));
 
-    // Wrap the quantum_effect_name in an Arc to share among threads safely
     let quantum_effect_name_arc = Arc::new(quantum_effect_name);
 
     fractal.par_iter_mut().enumerate().for_each(|(y, row)| {
@@ -62,7 +59,6 @@ fn generate_quantum_fractal(
             let zy = y_min + (y_max - y_min) * (y as f64 / height as f64);
             let z = Complex::new(zx, zy);
 
-            // Dereference the Arc to get the actual String
             *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &quantum_effect_name);
             counter_clone.fetch_add(1, Ordering::Relaxed);
         });
@@ -75,7 +71,7 @@ fn generate_quantum_fractal(
 }
 
 #[pymodule]
-fn quantum_fractal(_py: Python, m: &PyModule) -> PyResult<()> {
+fn q_julia(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_quantum_fractal, m)?)?;
     Ok(())
 }
