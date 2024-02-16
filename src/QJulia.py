@@ -123,32 +123,37 @@ class FractalWindow(QMainWindow):
     def startFractalGeneration(self):
         threading.Thread(target=self.generateFractal, daemon=True).start()
 
-    def generateFractal(self):
+        def generateFractal(self):
         self.update_status_signal.emit("Generating fractal...")
         QApplication.processEvents()
-        x_min = self.x_min_slider['slider'].value() / 10.0
-        x_max = self.x_max_slider['slider'].value() / 10.0
-        y_min = self.y_min_slider['slider'].value() / 10.0
-        y_max = self.y_max_slider['slider'].value() / 10.0
-        c_real = self.c_real_slider['slider'].value() / 10.0
-        c_imag = self.c_imag_slider['slider'].value() / 10.0
-        max_iter = self.max_iter_slider['slider'].value()
-        hbar = self.hbar_slider['slider'].value() / 10.0
-        quantum_effect_name = self.effectCombo.currentText()
 
-        start_time = time.time()
-        fractal = quantum_fractal.generate_quantum_fractal(
-            self.width, self.height, x_min, x_max, y_min, y_max,
-            c_real, c_imag, max_iter, hbar, quantum_effect_name
-        )
-        end_time = time.time()
-        fractal_array = np.array(fractal, dtype=np.uint32)
-        self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
+        try:
+            x_min = self.x_min_slider['slider'].value() / 10.0
+            x_max = self.x_max_slider['slider'].value() / 10.0
+            y_min = self.y_min_slider['slider'].value() / 10.0
+            y_max = self.y_max_slider['slider'].value() / 10.0
+            c_real = self.c_real_slider['slider'].value() / 10.0
+            c_imag = self.c_imag_slider['slider'].value() / 10.0
+            max_iter = self.max_iter_slider['slider'].value()
+            hbar = self.hbar_slider['slider'].value() / 10.0
+            quantum_effect_name = self.effectCombo.currentText()
 
-    except Exception as e:
-        QMessageBox.critical(self, "Error", f"An error occurred: {e}")
-        self.update_status_signal.emit("Failed to generate fractal")
-        self.progressBar.setValue(0)
+            start_time = time.time()
+
+            fractal = quantum_fractal.generate_quantum_fractal(
+                self.width, self.height, x_min, x_max, y_min, y_max,
+                c_real, c_imag, max_iter, hbar, quantum_effect_name
+            )
+
+            end_time = time.time()
+            fractal_array = np.array(fractal, dtype=np.uint32)
+            self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {e}")
+            self.update_status_signal.emit("Failed to generate fractal")
+            self.progressBar.setValue(0)
+
 
 def main():
     app = QApplication(sys.argv)
