@@ -1,8 +1,4 @@
 import sys
-import os
-import ctypes
-import threading
-from numpy.ctypeslib import ndpointer
 import numpy as np
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import (
@@ -16,16 +12,7 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar
 )
 import time
-
-def get_library_path():
-    library_name = "QJulia"
-    library_extension = {"win32": ".dll", "linux": ".so", "darwin": ".dylib"}[sys.platform]
-    library_file = f"{library_name}{library_extension}"
-    project_root = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(project_root, "target", "release", library_file)
-
-rust_lib_path = get_library_path()
-rust_lib = ctypes.CDLL(rust_lib_path)
+import quantum_fractal
 
 class FractalWindow(QMainWindow):
     update_status_signal = pyqtSignal(str)
@@ -161,19 +148,12 @@ class FractalWindow(QMainWindow):
         hbar = self.hbar_slider.value() / 10.0
         quantum_effect_name = self.effectCombo.currentText()
 
-        rust_lib.generate_quantum_fractal.argtypes = [
-            ctypes.c_size_t, ctypes.c_size_t, ctypes.c_double, ctypes.c_double,
-            ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double,
-            ctypes.c_uint, ctypes.c_double, ctypes.c_char_p
-        ]
-        rust_lib.generate_quantum_fractal.restype = ndpointer(dtype=ctypes.c_uint, shape=(self.height, self.width))
-
         start_time = time.time()
 
         try:
-            fractal = rust_lib.generate_quantum_fractal(
+            fractal = quantum_fractal.generate_quantum_fractal(
                 self.width, self.height, x_min, x_max, y_min, y_max,
-                c_real, c_imag, max_iter, hbar, quantum_effect_name.encode('utf-8')
+                c_real, c_imag, max_iter, hbar, quantum_effect_name
             )
 
             end_time = time.time()
