@@ -3,17 +3,18 @@ use num_complex::Complex;
 use rayon::prelude::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use log::{info, warn};
+use log::{info, error};
 
-fn apply_gate(z: Complex<f64>, gate: &str, phase: f64) -> Complex<f64> {
+fn apply_gate(z: Complex<f64>, gate: &str, phase: f64) -> PyResult<Complex<f64>> {
     match gate {
-        "pauli_x" => Complex::new(z.im, z.re),
-        "pauli_y" => Complex::new(-z.im, z.re),
-        "hadamard" => (Complex::new(z.re, z.re) + Complex::new(z.im, -z.im)) / (2f64).sqrt(),
-        "phase_shift" => Complex::new(z.re, z.im * phase),
+        "pauli_x" => Ok(Complex::new(z.im, z.re)),
+        "pauli_y" => Ok(Complex::new(-z.im, z.re)),
+        "hadamard" => Ok((Complex::new(z.re, z.re) + Complex::new(z.im, -z.im)) / (2f64).sqrt()),
+        "phase_shift" => Ok(Complex::new(z.re, z.im * phase)),
         _ => {
-            warn!("Unknown quantum gate: {}", gate);
-            z
+            let err_msg = format!("Unknown quantum gate: {}", gate);
+            error!("{}", err_msg);
+            Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(err_msg))
         }
     }
 }
@@ -27,7 +28,13 @@ fn complex_fractal_algorithm(z: Complex<f64>, c: Complex<f64>, max_iter: u32, hb
             "phase_kickback" => z * c,
             "quantum_tunneling" => z * c + z,
             "superposition" => z * z + c / Complex::new(hbar, hbar),
-            _ => apply_gate(z, quantum_effect, hbar),
+            _ => match apply_gate(z, quantum_effect, hbar) {
+                Ok(val) => val,
+                Err(err) => {
+                    error!("{}", err);
+                    return 0; // or any other appropriate value indicating failure
+                }
+            }
         };
         iter += 1;
     }

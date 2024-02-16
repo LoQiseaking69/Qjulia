@@ -17,6 +17,18 @@ import threading
 import subprocess
 from ctypes import cdll, c_void_p, CFUNCTYPE, c_uint, POINTER
 
+# Constants
+MIN_VAL = -100
+MAX_VAL = 100
+INIT_VAL_X_MIN = -20
+INIT_VAL_X_MAX = 20
+INIT_VAL_Y_MIN = -15
+INIT_VAL_Y_MAX = 15
+INIT_VAL_C_REAL = -8
+INIT_VAL_C_IMAG = 15
+INIT_VAL_MAX_ITER = 1000
+INIT_VAL_HBAR = 10
+
 class FractalWindow(QMainWindow):
     update_status_signal = pyqtSignal(str)
     fractal_generated_signal = pyqtSignal(np.ndarray, float)
@@ -40,21 +52,21 @@ class FractalWindow(QMainWindow):
         self.effectCombo.addItems(["phase_kickback", "quantum_tunneling", "superposition", "pauli_x", "pauli_y", "hadamard", "phase_shift"])
         left_panel.addWidget(self.create_labeled_control("Select Quantum Effect:", self.effectCombo))
 
-        self.x_min_slider = self.create_slider(-100, 100, -20, "X Min:")
+        self.x_min_slider = self.create_slider(MIN_VAL, MAX_VAL, INIT_VAL_X_MIN, "X Min:")
         left_panel.addWidget(self.x_min_slider['container_widget'])
-        self.x_max_slider = self.create_slider(-100, 100, 20, "X Max:")
+        self.x_max_slider = self.create_slider(MIN_VAL, MAX_VAL, INIT_VAL_X_MAX, "X Max:")
         left_panel.addWidget(self.x_max_slider['container_widget'])
-        self.y_min_slider = self.create_slider(-100, 100, -15, "Y Min:")
+        self.y_min_slider = self.create_slider(MIN_VAL, MAX_VAL, INIT_VAL_Y_MIN, "Y Min:")
         left_panel.addWidget(self.y_min_slider['container_widget'])
-        self.y_max_slider = self.create_slider(-100, 100, 15, "Y Max:")
+        self.y_max_slider = self.create_slider(MIN_VAL, MAX_VAL, INIT_VAL_Y_MAX, "Y Max:")
         left_panel.addWidget(self.y_max_slider['container_widget'])
-        self.c_real_slider = self.create_slider(-100, 100, -8, "C Real:")
+        self.c_real_slider = self.create_slider(MIN_VAL, MAX_VAL, INIT_VAL_C_REAL, "C Real:")
         left_panel.addWidget(self.c_real_slider['container_widget'])
-        self.c_imag_slider = self.create_slider(-100, 100, 15, "C Imag:")
+        self.c_imag_slider = self.create_slider(MIN_VAL, MAX_VAL, INIT_VAL_C_IMAG, "C Imag:")
         left_panel.addWidget(self.c_imag_slider['container_widget'])
-        self.max_iter_slider = self.create_slider(1, 10000, 1000, "Max Iterations:")
+        self.max_iter_slider = self.create_slider(1, 10000, INIT_VAL_MAX_ITER, "Max Iterations:")
         left_panel.addWidget(self.max_iter_slider['container_widget'])
-        self.hbar_slider = self.create_slider(1, 100, 10, "H Bar:")
+        self.hbar_slider = self.create_slider(1, 100, INIT_VAL_HBAR, "H Bar:")
         left_panel.addWidget(self.hbar_slider['container_widget'])
 
         self.generateButton = QPushButton("Generate Fractal")
@@ -142,22 +154,18 @@ class FractalWindow(QMainWindow):
 
             start_time = time.time()
 
-            # Dynamically load the Rust DLL after building
-            subprocess.run(["cargo", "build", "--release"], check=True)
+            self.build_rust_dll()
             dir_path = os.path.dirname(os.path.realpath(__file__))
             lib = cdll.LoadLibrary(os.path.join(dir_path, "target", "release", "libq_julia.dll"))
 
-            # Define the argtypes and restype for the Rust function
             lib.generate_quantum_fractal.argtypes = [c_uint, c_uint, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_uint, c_void_p, c_void_p]
             lib.generate_quantum_fractal.restype = POINTER(c_uint)
 
-            # Convert the Python function to a C function pointer
             generate_quantum_fractal = CFUNCTYPE(POINTER(c_uint), c_uint, c_uint, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_uint, c_void_p, c_void_p)(lib.generate_quantum_fractal)
 
-            # Generate fractal using the Rust function
             fractal_ptr = generate_quantum_fractal(
                 self.width, self.height, x_min, x_max, y_min, y_max,
-                c_real, c_imag, max_iter, hbar, quantum_effect_name
+                c_real, c_imag, max_iter, hbar, quantum_effect_name.encode()
             )
 
             end_time = time.time()
@@ -165,10 +173,23 @@ class FractalWindow(QMainWindow):
             self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
 
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred: {e}")
-            self.update_status_signal.emit("Failed to generate fractal")
-            self.progressBar.setValue(0)
+            self.handleFractalError(e)
 
+    def handleFractalError(self, error):
+        QMessageBox.critical(self, "Error", f"An error occurred: {error}")
+        self.update_status_signal.emit("Failed to generate fractal")
+        self.progressBar.setValue(0)
+
+    def build_rust_dll(self):
+        try:
+            subprocess.run(["cargo", "build", "--release"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            self.handleBuildError(e)
+
+    def handleBuildError(self, error):
+        QMessageBox.critical(self, "Error", f"An error occurred while building the Rust DLL: {error}")
+        self.update_status_signal.emit("Failed to generate fractal")
+        self.progressBar.setValue(0)
 
 def main():
     app = QApplication(sys.argv)

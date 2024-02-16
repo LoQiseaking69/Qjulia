@@ -1,5 +1,5 @@
 PyQt5
+qtwidgets
 numpy
 matplotlib
 PyInstaller
-numba
