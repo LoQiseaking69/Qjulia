@@ -1,41 +1,58 @@
-name: Build and Package Quantum Fractal Generator
+name: Build, Publish, and Package Quantum Fractal Generator
 
 on:
   push:
     branches: [main]
+    tags: ['*']
   pull_request:
     branches: [main]
 
 jobs:
-  build-and-package:
+  build-and-publish:
     runs-on: windows-latest
+    environment: QJulia  # Specify the environment name here
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Rust
+      - name: Set up Rust Environment
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           profile: minimal
           default: true
 
-      - name: Cache Rust Build
+      - name: Cache Rust Dependencies
         uses: actions/cache@v3
         with:
           path: |
-            src/target
             ~\.cargo\registry
             ~\.cargo\git
-          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-rust-deps-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Rust Target Directory
+        uses: actions/cache@v3
+        with:
+          path: src/target
+          key: ${{ runner.os }}-rust-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build Rust Library
         run: |
           cd src
           cargo build --release
 
-      - name: Set up Python
+      # Publish only on tagged commits to prevent unnecessary publishing
+      - name: Publish to Crates.io
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --token ${{ secrets.QJCRATE }}  # Use the correct secret name here
+        env:
+          CARGO_TERM_COLOR: always
+
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -43,8 +60,7 @@ jobs:
       - name: Cache Python Dependencies
         uses: actions/cache@v3
         with:
-          path: |
-            ~\AppData\Local\pip\Cache
+          path: ~\AppData\Local\pip\Cache
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
 
       - name: Install Python Dependencies
@@ -52,6 +68,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
 
+      # Package application with PyInstaller
       - name: Package PyQt5 Application
         run: |
           pyinstaller --noconfirm --onefile --noconsole `
