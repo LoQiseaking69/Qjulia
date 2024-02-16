@@ -1,12 +1,12 @@
 [package]
-name = "QJulia"
+name = "q_julia" # Changed to snake_case
 version = "0.2.0"
 edition = "2021"
 description = "Quantum Fractal Generator - A Rust library for generating fractals with quantum-inspired algorithms."
 authors = ["Ant OG <Reel0112358.13@proton.me>"]
 license = "MIT"
-repository = "https://github.com/LoQiseaking69/QJulia"
-documentation = "https://github.com/LoQiseaking69/Qjulia/blob/main/README.md"
+repository = "https://github.com/LoQiseaking69/q_julia" # Changed repository URL to match the new name
+documentation = "https://github.com/LoQiseaking69/q_julia/blob/main/README.md" # Changed documentation URL to match the new name
 
 # Dependencies
 [dependencies]
