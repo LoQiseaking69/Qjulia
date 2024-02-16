@@ -123,7 +123,7 @@ class FractalWindow(QMainWindow):
     def startFractalGeneration(self):
         threading.Thread(target=self.generateFractal, daemon=True).start()
 
-        def generateFractal(self):
+    def generateFractal(self):
         self.update_status_signal.emit("Generating fractal...")
         QApplication.processEvents()
 
