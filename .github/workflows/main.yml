@@ -20,14 +20,15 @@ jobs:
           toolchain: stable
           profile: minimal
           default: true
+          components: rustfmt, clippy
 
       - name: Cache Rust Build
         uses: actions/cache@v3
         with:
           path: |
             src/target
-            C:\Users\runneradmin\.cargo\registry
-            C:\Users\runneradmin\.cargo\git
+            ~\.cargo\registry
+            ~\.cargo\git
           key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build Rust Library
@@ -55,7 +56,7 @@ jobs:
       - name: Package PyQt5 Application
         run: |
           pyinstaller --noconfirm --onefile --noconsole `
-                      --add-binary "src/target/release/QJulia.dll;." `
+                      --add-binary "src/target/release/q_julia.dll;." `
                       src/QJulia.py
         shell: pwsh
 
@@ -64,5 +65,5 @@ jobs:
         with:
           name: quantum-fractal-package
           path: |
-            src/target/release/QJulia.dll
+            src/target/release/q_julia.dll
             dist/QJulia.exe
