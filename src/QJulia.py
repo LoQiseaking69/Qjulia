@@ -1,3 +1,4 @@
+import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +14,8 @@ from matplotlib.backends.backend_qt5agg import (
 )
 import time
 import threading
-import q_julia as quantum_fractal
+import subprocess
+from ctypes import cdll, c_void_p, CFUNCTYPE, c_uint, POINTER
 
 class FractalWindow(QMainWindow):
     update_status_signal = pyqtSignal(str)
@@ -140,13 +142,26 @@ class FractalWindow(QMainWindow):
 
             start_time = time.time()
 
-            fractal = quantum_fractal.generate_quantum_fractal(
+            # Dynamically load the Rust DLL after building
+            subprocess.run(["cargo", "build", "--release"], check=True)
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            lib = cdll.LoadLibrary(os.path.join(dir_path, "target", "release", "libq_julia.dll"))
+
+            # Define the argtypes and restype for the Rust function
+            lib.generate_quantum_fractal.argtypes = [c_uint, c_uint, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_uint, c_void_p, c_void_p]
+            lib.generate_quantum_fractal.restype = POINTER(c_uint)
+
+            # Convert the Python function to a C function pointer
+            generate_quantum_fractal = CFUNCTYPE(POINTER(c_uint), c_uint, c_uint, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_uint, c_void_p, c_void_p)(lib.generate_quantum_fractal)
+
+            # Generate fractal using the Rust function
+            fractal_ptr = generate_quantum_fractal(
                 self.width, self.height, x_min, x_max, y_min, y_max,
                 c_real, c_imag, max_iter, hbar, quantum_effect_name
             )
 
             end_time = time.time()
-            fractal_array = np.array(fractal, dtype=np.uint32)
+            fractal_array = np.ctypeslib.as_array(fractal_ptr, shape=(self.height, self.width))
             self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
 
         except Exception as e:
