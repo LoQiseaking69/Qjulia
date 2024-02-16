@@ -12,7 +12,10 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar
 )
 import time
-import quantum_fractal
+import threading
+
+# Adjusted to import the Rust library
+import q_julia as quantum_fractal
 
 class FractalWindow(QMainWindow):
     update_status_signal = pyqtSignal(str)
@@ -157,7 +160,8 @@ class FractalWindow(QMainWindow):
             )
 
             end_time = time.time()
-            self.fractal_generated_signal.emit(fractal, end_time - start_time)
+            fractal_array = np.array(fractal, dtype=np.uint32)  # Convert to NumPy array if needed
+            self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
