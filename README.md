@@ -19,7 +19,6 @@ The Quantum Fractal Generator is an advanced application that leverages both Pyt
 - PyQt5
 - NumPy
 - Matplotlib
-- Numba
 - Rust (for running the high-performance backend)
 
 ## Installation
