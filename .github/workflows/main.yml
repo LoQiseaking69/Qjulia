@@ -47,7 +47,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           cd src
-          cargo publish --token ${{ secrets.QJCRATE }}
+          cargo publish --token ${{ secrets.QJCRATE }} --allow-dirty
         env:
           CARGO_TERM_COLOR: always
 
