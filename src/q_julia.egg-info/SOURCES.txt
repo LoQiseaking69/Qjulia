@@ -1,0 +1,7 @@
+setup.py
+q_julia.egg-info/PKG-INFO
+q_julia.egg-info/SOURCES.txt
+q_julia.egg-info/dependency_links.txt
+q_julia.egg-info/not-zip-safe
+q_julia.egg-info/requires.txt
+q_julia.egg-info/top_level.txt
