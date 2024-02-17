@@ -1,5 +1,13 @@
+import os
 from setuptools import setup, find_packages
 from setuptools_rust import RustExtension, Binding
+
+# Get the directory where setup.py is located
+here = os.path.abspath(os.path.dirname(__file__))
+
+# Read the contents of your README file
+with open(os.path.join(here, '..', 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name="q_julia",
@@ -7,7 +15,7 @@ setup(
     author="Ant OG",
     author_email="Reel0112358.13@proton.me",
     description="Quantum Fractal Generator - A Rust library for generating fractals with quantum-inspired algorithms.",
-    long_description=open('README.md').read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/LoQiseaking69/q_julia",
     license="MIT",
