@@ -56,7 +56,6 @@ fn complex_fractal_algorithm(z: Complex<f64>, c: Complex<f64>, max_iter: u32, hb
 
 #[pyfunction]
 fn generate_quantum_fractal(
-    py: Python,
     width: usize, height: usize,
     x_min: f64, x_max: f64,
     y_min: f64, y_max: f64,
@@ -84,11 +83,11 @@ fn generate_quantum_fractal(
             *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &gate);
             let progress = progress_data_clone.counter.fetch_add(1, Ordering::Relaxed);
             if progress % (progress_data_clone.total / 10) == 0 {
-                py.allow_threads(|| {
+                Python::with_gil(|py| {
                     progress_callback.call1(py, (progress, progress_data_clone.total)).unwrap_or_else(|e| {
                         warn!("Failed to call progress callback: {:?}", e);
                         e.restore(py);
-                        Python::with_gil(|py| py.None())
+                        py.None()
                     });
                 });
             }
@@ -100,7 +99,7 @@ fn generate_quantum_fractal(
 }
 
 #[pymodule]
-fn q_julia(py: Python, m: &PyModule) -> PyResult<()> {
+fn q_julia(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_quantum_fractal, m)?)?;
     Ok(())
 }
