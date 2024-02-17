@@ -3,9 +3,13 @@ use num_complex::Complex;
 use rayon::prelude::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use log::{info, warn, error};
+use log::{info, warn};
 
-// Quantum gate enumeration
+struct ProgressData {
+    counter: AtomicUsize,
+    total: usize,
+}
+
 enum QuantumGate {
     PauliX,
     PauliY,
@@ -24,23 +28,15 @@ impl QuantumGate {
     }
 }
 
-struct ProgressData {
-    counter: AtomicUsize,
-    total: usize,
-}
-
-// Function to parse quantum gate from string
 fn parse_quantum_gate(gate: &str, phase: Option<f64>) -> Result<QuantumGate, PyErr> {
     match gate {
         "pauli_x" => Ok(QuantumGate::PauliX),
         "pauli_y" => Ok(QuantumGate::PauliY),
         "hadamard" => Ok(QuantumGate::Hadamard),
-        "phase_shift" => {
-            phase.map_or_else(
-                || Err(PyErr::new::<pyo3::exceptions::PyValueError, _>("Phase required for phase shift gate")),
-                |p| Ok(QuantumGate::PhaseShift(p))
-            )
-        }
+        "phase_shift" => phase.map_or_else(
+            || Err(PyErr::new::<pyo3::exceptions::PyValueError, _>("Phase required for phase shift gate")),
+            |p| Ok(QuantumGate::PhaseShift(p))
+        ),
         _ => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Unknown quantum gate: {}", gate))),
     }
 }
@@ -92,6 +88,7 @@ fn generate_quantum_fractal(
                     progress_callback.call1(py, (progress, progress_data_clone.total)).unwrap_or_else(|e| {
                         warn!("Failed to call progress callback: {:?}", e);
                         e.restore(py);
+                        Python::with_gil(|py| py.None())
                     });
                 });
             }
