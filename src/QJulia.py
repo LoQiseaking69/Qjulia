@@ -1,4 +1,3 @@
-import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,8 +13,7 @@ from matplotlib.backends.backend_qt5agg import (
 )
 import time
 import threading
-import subprocess
-from ctypes import cdll, c_void_p, CFUNCTYPE, c_uint, POINTER
+import q_julia.q_julia as qjulia
 
 # Constants
 MIN_VAL = -100
@@ -154,22 +152,13 @@ class FractalWindow(QMainWindow):
 
             start_time = time.time()
 
-            self.build_rust_dll()
-            dir_path = os.path.dirname(os.path.realpath(__file__))
-            lib = cdll.LoadLibrary(os.path.join(dir_path, "target", "release", "libq_julia.dll"))
-
-            lib.generate_quantum_fractal.argtypes = [c_uint, c_uint, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_uint, c_void_p, c_void_p]
-            lib.generate_quantum_fractal.restype = POINTER(c_uint)
-
-            generate_quantum_fractal = CFUNCTYPE(POINTER(c_uint), c_uint, c_uint, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_uint, c_void_p, c_void_p)(lib.generate_quantum_fractal)
-
-            fractal_ptr = generate_quantum_fractal(
+            # Call the Rust function directly
+            fractal_array = qjulia.generate_quantum_fractal(
                 self.width, self.height, x_min, x_max, y_min, y_max,
-                c_real, c_imag, max_iter, hbar, quantum_effect_name.encode()
+                c_real, c_imag, max_iter, hbar, quantum_effect_name
             )
 
             end_time = time.time()
-            fractal_array = np.ctypeslib.as_array(fractal_ptr, shape=(self.height, self.width))
             self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
 
         except Exception as e:
@@ -177,17 +166,6 @@ class FractalWindow(QMainWindow):
 
     def handleFractalError(self, error):
         QMessageBox.critical(self, "Error", f"An error occurred: {error}")
-        self.update_status_signal.emit("Failed to generate fractal")
-        self.progressBar.setValue(0)
-
-    def build_rust_dll(self):
-        try:
-            subprocess.run(["cargo", "build", "--release"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except subprocess.CalledProcessError as e:
-            self.handleBuildError(e)
-
-    def handleBuildError(self, error):
-        QMessageBox.critical(self, "Error", f"An error occurred while building the Rust DLL: {error}")
         self.update_status_signal.emit("Failed to generate fractal")
         self.progressBar.setValue(0)
 
