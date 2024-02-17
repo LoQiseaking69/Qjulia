@@ -28,6 +28,17 @@ impl QuantumGate {
     }
 }
 
+impl Clone for QuantumGate {
+    fn clone(&self) -> Self {
+        match *self {
+            QuantumGate::PauliX => QuantumGate::PauliX,
+            QuantumGate::PauliY => QuantumGate::PauliY,
+            QuantumGate::Hadamard => QuantumGate::Hadamard,
+            QuantumGate::PhaseShift(phase) => QuantumGate::PhaseShift(phase),
+        }
+    }
+}
+
 fn parse_quantum_gate(gate: &str, phase: Option<f64>) -> Result<QuantumGate, PyErr> {
     match gate {
         "pauli_x" => Ok(QuantumGate::PauliX),
@@ -77,14 +88,12 @@ fn generate_quantum_fractal(
     let mut fractal = vec![vec![0; width]; height];
     fractal.par_iter_mut().enumerate().for_each(|(y, row)| {
         let progress_data_clone = Arc::clone(&progress_data);
-        let gate_clone = gate.clone();  // Clone gate variable
-        let progress_callback_clone = progress_callback_clone.clone();  // Clone progress_callback_clone variable
         row.iter_mut().enumerate().for_each(move |(x, pixel)| {
             let zx = x_min + (x_max - x_min) * (x as f64 / width as f64);
             let zy = y_min + (y_max - y_min) * (y as f64 / height as f64);
             let z = Complex::new(zx, zy);
 
-            *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &gate_clone);
+            *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &gate);
             let progress = progress_data_clone.counter.fetch_add(1, Ordering::Relaxed);
             if progress % (progress_data_clone.total / 10) == 0 {
                 Python::with_gil(|py| {
