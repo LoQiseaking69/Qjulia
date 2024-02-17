@@ -1,3 +1,4 @@
+setuptools_rust
 PyQt5
 qtwidgets
 numpy
