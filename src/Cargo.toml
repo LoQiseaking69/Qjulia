@@ -1,6 +1,6 @@
 [package]
 name = "q_julia"
-version = "0.2.0"
+version = "0.3.0"  # Updated version
 edition = "2021"
 description = "Quantum Fractal Generator - A Rust library for generating fractals with quantum-inspired algorithms."
 authors = ["Ant OG <Reel0112358.13@proton.me>"]
