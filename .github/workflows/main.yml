@@ -10,7 +10,7 @@ on:
 jobs:
   build-and-publish:
     runs-on: windows-latest
-    environment: QJulia  # Specify the environment name here
+    environment: QJulia
 
     steps:
       - name: Checkout Code
@@ -42,7 +42,6 @@ jobs:
           cd src
           cargo build --release
 
-      # Adjusted publish step to change to the correct directory
       - name: Publish to Crates.io
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -60,19 +59,25 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('src/requirements.txt') }}
 
       - name: Install Python Dependencies
         run: |
+          cd src
           python -m pip install --upgrade pip
-          pip install -r src/requirements.txt
+          python -m pip install -r requirements.txt
 
-      # Package application with PyInstaller
+      - name: Build and Install Python Package
+        run: |
+          cd src
+          python setup.py install
+
       - name: Package PyQt5 Application
         run: |
+          cd src
           pyinstaller --noconfirm --onefile --noconsole `
-                      --add-binary "src/target/release/q_julia.dll;." `
-                      src/QJulia.py
+                      --add-binary "target/release/q_julia.dll;." `
+                      QJulia.py
         shell: pwsh
 
       - name: Upload Compiled Rust Library and Packaged Application
@@ -81,4 +86,4 @@ jobs:
           name: quantum-fractal-package
           path: |
             src/target/release/q_julia.dll
-            dist/QJulia.exe
+            src/dist/QJulia.exe
