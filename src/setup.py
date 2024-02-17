@@ -6,12 +6,12 @@ from setuptools_rust import RustExtension, Binding
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Read the contents of your README file
-with open(os.path.join(here, '..', 'README.md'), encoding='utf-8') as f:
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name="q_julia",
-    version="0.2.0",
+    version="0.3.0",  # Updated version
     author="Ant OG",
     author_email="Reel0112358.13@proton.me",
     description="Quantum Fractal Generator - A Rust library for generating fractals with quantum-inspired algorithms.",
