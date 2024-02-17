@@ -42,13 +42,12 @@ jobs:
           cd src
           cargo build --release
 
-      # Publish only on tagged commits to prevent unnecessary publishing
+      # Adjusted publish step to change to the correct directory
       - name: Publish to Crates.io
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions-rs/cargo@v1
-        with:
-          command: publish
-          args: --token ${{ secrets.QJCRATE }}  # Use the correct secret name here
+        run: |
+          cd src
+          cargo publish --token ${{ secrets.QJCRATE }}
         env:
           CARGO_TERM_COLOR: always
 
