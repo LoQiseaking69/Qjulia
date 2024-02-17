@@ -4,15 +4,14 @@ import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QSlider, QComboBox, QPushButton, QStatusBar, QMessageBox, QTextEdit,
-    QProgressBar
+    QProgressBar, QFileDialog
 )
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QThread
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar
 )
 import time
-import threading
 import q_julia.q_julia as qjulia
 
 # Constants
@@ -27,14 +26,42 @@ INIT_VAL_C_IMAG = 15
 INIT_VAL_MAX_ITER = 1000
 INIT_VAL_HBAR = 10
 
-class FractalWindow(QMainWindow):
-    update_status_signal = pyqtSignal(str)
+class FractalGenerator(QThread):
     fractal_generated_signal = pyqtSignal(np.ndarray, float)
+    update_status_signal = pyqtSignal(str)
 
+    def __init__(self, width, height, x_min, x_max, y_min, y_max, c_real, c_imag, max_iter, hbar, quantum_effect_name):
+        super().__init__()
+        self.width = width
+        self.height = height
+        self.x_min = x_min
+        self.x_max = x_max
+        self.y_min = y_min
+        self.y_max = y_max
+        self.c_real = c_real
+        self.c_imag = c_imag
+        self.max_iter = max_iter
+        self.hbar = hbar
+        self.quantum_effect_name = quantum_effect_name
+
+    def run(self):
+        try:
+            start_time = time.time()
+            fractal_array = qjulia.generate_quantum_fractal(
+                self.width, self.height, self.x_min, self.x_max, self.y_min, self.y_max,
+                self.c_real, self.c_imag, self.max_iter, self.hbar, self.quantum_effect_name
+            )
+            end_time = time.time()
+            self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
+        except Exception as e:
+            self.update_status_signal.emit(f"Error: {e}")
+
+class FractalWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.width, self.height = 800, 600
         self.initUI()
+        self.fractalGenerator = None
 
     def initUI(self):
         self.setWindowTitle('Quantum Fractal Generator')
@@ -71,6 +98,10 @@ class FractalWindow(QMainWindow):
         self.generateButton.clicked.connect(self.startFractalGeneration)
         left_panel.addWidget(self.generateButton)
 
+        self.saveButton = QPushButton("Save Fractal")
+        self.saveButton.clicked.connect(self.saveFractalImage)
+        left_panel.addWidget(self.saveButton)
+
         self.progressBar = QProgressBar()
         left_panel.addWidget(self.progressBar)
 
@@ -89,9 +120,6 @@ class FractalWindow(QMainWindow):
         right_panel.addWidget(self.toolbar)
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
-
-        self.update_status_signal.connect(self.updateStatusBar)
-        self.fractal_generated_signal.connect(self.displayFractal)
 
     def create_labeled_control(self, label_text, control):
         layout = QHBoxLayout()
@@ -133,41 +161,28 @@ class FractalWindow(QMainWindow):
         self.progressBar.setValue(100)
 
     def startFractalGeneration(self):
-        threading.Thread(target=self.generateFractal, daemon=True).start()
+        x_min = self.x_min_slider['slider'].value() / 10.0
+        x_max = self.x_max_slider['slider'].value() / 10.0
+        y_min = self.y_min_slider['slider'].value() / 10.0
+        y_max = self.y_max_slider['slider'].value() / 10.0
+        c_real = self.c_real_slider['slider'].value() / 10.0
+        c_imag = self.c_imag_slider['slider'].value() / 10.0
+        max_iter = self.max_iter_slider['slider'].value()
+        hbar = self.hbar_slider['slider'].value() / 10.0
+        quantum_effect_name = self.effectCombo.currentText()
 
-    def generateFractal(self):
-        self.update_status_signal.emit("Generating fractal...")
-        QApplication.processEvents()
+        self.fractalGenerator = FractalGenerator(
+            self.width, self.height, x_min, x_max, y_min, y_max,
+            c_real, c_imag, max_iter, hbar, quantum_effect_name
+        )
+        self.fractalGenerator.fractal_generated_signal.connect(self.displayFractal)
+        self.fractalGenerator.update_status_signal.connect(self.updateStatusBar)
+        self.fractalGenerator.start()
 
-        try:
-            x_min = self.x_min_slider['slider'].value() / 10.0
-            x_max = self.x_max_slider['slider'].value() / 10.0
-            y_min = self.y_min_slider['slider'].value() / 10.0
-            y_max = self.y_max_slider['slider'].value() / 10.0
-            c_real = self.c_real_slider['slider'].value() / 10.0
-            c_imag = self.c_imag_slider['slider'].value() / 10.0
-            max_iter = self.max_iter_slider['slider'].value()
-            hbar = self.hbar_slider['slider'].value() / 10.0
-            quantum_effect_name = self.effectCombo.currentText()
-
-            start_time = time.time()
-
-            # Call the Rust function directly
-            fractal_array = qjulia.generate_quantum_fractal(
-                self.width, self.height, x_min, x_max, y_min, y_max,
-                c_real, c_imag, max_iter, hbar, quantum_effect_name
-            )
-
-            end_time = time.time()
-            self.fractal_generated_signal.emit(fractal_array, end_time - start_time)
-
-        except Exception as e:
-            self.handleFractalError(e)
-
-    def handleFractalError(self, error):
-        QMessageBox.critical(self, "Error", f"An error occurred: {error}")
-        self.update_status_signal.emit("Failed to generate fractal")
-        self.progressBar.setValue(0)
+    def saveFractalImage(self):
+        filepath, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*)")
+        if filepath:
+            self.figure.savefig(filepath)
 
 def main():
     app = QApplication(sys.argv)
