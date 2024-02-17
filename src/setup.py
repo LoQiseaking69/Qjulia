@@ -5,8 +5,9 @@ from setuptools_rust import RustExtension, Binding
 # Get the directory where setup.py is located
 here = os.path.abspath(os.path.dirname(__file__))
 
-# Read the contents of your README file
-with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+# Read the contents of your README file from the root of your repository
+readme_path = os.path.abspath(os.path.join(here, '..', 'README.md'))
+with open(readme_path, encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
