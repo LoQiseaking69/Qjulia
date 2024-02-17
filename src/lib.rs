@@ -5,7 +5,6 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use log::{info, error};
 
-// Define a struct to hold progress data
 struct ProgressData {
     counter: AtomicUsize,
     total: usize,
@@ -50,7 +49,6 @@ fn complex_fractal_algorithm(z: Complex<f64>, c: Complex<f64>, max_iter: u32, hb
 
 #[pyfunction]
 fn generate_quantum_fractal(
-    py: Python,  // Add Python interpreter reference
     width: usize, height: usize,
     x_min: f64, x_max: f64,
     y_min: f64, y_max: f64,
@@ -70,20 +68,15 @@ fn generate_quantum_fractal(
 
     fractal.par_iter_mut().enumerate().for_each(|(y, row)| {
         let progress_data_clone = Arc::clone(&progress_data);
-        let quantum_effect_name = Arc::clone(&quantum_effect_name_arc);
+        let quantum_effect_name = quantum_effect_name_arc.clone();
         row.iter_mut().enumerate().for_each(move |(x, pixel)| {
             let zx = x_min + (x_max - x_min) * (x as f64 / width as f64);
             let zy = y_min + (y_max - y_min) * (y as f64 / height as f64);
             let z = Complex::new(zx, zy);
 
-            *pixel = match complex_fractal_algorithm(z, c, max_iter, hbar, &quantum_effect_name) {
-                Ok(val) => val,
-                Err(_) => 0,
-            };
+            *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &quantum_effect_name)
+                .unwrap_or(0);
             progress_data_clone.counter.fetch_add(1, Ordering::Relaxed);
-
-            // Optionally, release the GIL for a short time.
-            py.allow_threads(|| std::thread::sleep(std::time::Duration::from_millis(1)));
         });
     });
 
@@ -94,7 +87,7 @@ fn generate_quantum_fractal(
 }
 
 #[pymodule]
-fn q_julia(py: Python, m: &PyModule) -> PyResult<()> {
+fn q_julia(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_quantum_fractal, m)?)?;
     Ok(())
 }
