@@ -73,7 +73,6 @@ fn generate_quantum_fractal(
     });
 
     let progress_callback_clone = progress_callback.clone();
-    let gate_clone = gate.clone();
 
     let mut fractal = vec![vec![0; width]; height];
     fractal.par_iter_mut().enumerate().for_each(|(y, row)| {
@@ -83,7 +82,7 @@ fn generate_quantum_fractal(
             let zy = y_min + (y_max - y_min) * (y as f64 / height as f64);
             let z = Complex::new(zx, zy);
 
-            *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &gate_clone);
+            *pixel = complex_fractal_algorithm(z, c, max_iter, hbar, &gate);
             let progress = progress_data_clone.counter.fetch_add(1, Ordering::Relaxed);
             if progress % (progress_data_clone.total / 10) == 0 {
                 Python::with_gil(|py| {
