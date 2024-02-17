@@ -31,12 +31,16 @@ The Quantum Fractal Generator is an advanced application that leverages both Pyt
    cargo build --release
    ```
 
-4. Install the required Python dependencies:
+4. Setup rust import
+
+    ```bash
+    python setup.py install
+    ```
+5. Install the required Python dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
-
 ## Usage
 
 Run the application by executing the Python script:
