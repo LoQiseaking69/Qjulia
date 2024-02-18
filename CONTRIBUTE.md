@@ -36,7 +36,7 @@ There are numerous ways to be a part of the Qjulia odyssey:
    - Be an ambassador of inclusivity and collaboration.
 
 ## Did You Know? 💡
-The science community's exploration of fractals gained a significant boost from visualizations of hyperparameter training data. These intricate patterns not only reveal the complexity of mathematical structures but also echo the beauty of computational processes in machine learning and data science!
+The science community's exploration of fractals gained a significant boost from visualizations of hyperparameter training data! just an intrigueing find recently... to be honest, but an exciting example of the complex relationship of the geometry of the complex plane and useful numerical data. These intricate patterns not only reveal the complexity of mathematical structures but also echo the beauty of computational processes in machine learning and data science!
 
 ## Stay Connected 📡
 Keep up with Qjulia's journey by joining our community channels. Whether you're contributing code, ideas, or just spreading the word, you're a vital part of our mission.
