@@ -37,7 +37,7 @@ We invite contributors who are enthusiastic about scientific exploration and who
 - Active participation from the community is encouraged for governance evolution.
 
 ## 10. Code of Conduct
-- All projects adhere to a [Contributor Code of Conduct](CODE_OF_CONDUCT.md), emphasizing a respectful, inclusive, and collaborative environment.
+- All projects adhere to a [Contributor Code of Conduct](CONDUCT.md), emphasizing a respectful, inclusive, and collaborative environment.
 
 ## 11. Licensing
 - Our projects are released under open-source licenses like the MIT License to promote wide participation and collaboration in line with NumFOCUS's vision.
